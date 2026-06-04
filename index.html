@@ -711,14 +711,8 @@ function isRealName(val) {
   const parts = cleaned.split(/\s+/).filter(p => p.length > 0);
   if (parts.length < 2) return false;
   for (const p of parts) {
-    const letters = p.replace(/[^a-zA-Z]/g,'');
-    if (letters.length < 2) return false;
-    if (/^(.)\1+$/.test(letters)) return false;
+    if (p.length < 2) return false;
   }
-  const joined = parts.join('').toLowerCase();
-  const noVowels = !/[aeiou]/.test(joined);
-  if (noVowels && joined.length > 4) return false;
-  if (/^(asdf|qwer|zxcv|aaaa|bbbb|cccc|test|fake|asas)/.test(joined)) return false;
   return true;
 }
 
