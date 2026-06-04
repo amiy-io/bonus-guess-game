@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Consistency Literally Pays Off</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Syne:wght@400;500;700;800&family=Cabinet+Grotesk:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lime: #c8f53e;
+    --pink: #ff6b9d;
+    --blue: #034a92;
+    --orange: #ff7c3a;
+    --mint: #3dffc0;
+    --yellow: #f6ca13;
+    --bg: #f0eee8;
+    --surface: #ffffff;
+    --text: #0d0d0d;
+    --muted: #888;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---- ANIMATED BG ---- */
+  .bg-blobs {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+    animation: floatBlob 8s ease-in-out infinite alternate;
+  }
+  .blob-1 { width: 500px; height: 500px; background: var(--lime); top: -120px; left: -80px; animation-duration: 9s; }
+  .blob-2 { width: 400px; height: 400px; background: var(--pink); top: 10%; right: -100px; animation-duration: 11s; animation-delay: -3s; }
+  .blob-3 { width: 350px; height: 350px; background: var(--blue); bottom: 20%; left: 10%; animation-duration: 10s; animation-delay: -5s; opacity: 0.22; }
+  .blob-4 { width: 300px; height: 300px; background: var(--orange); bottom: -80px; right: 15%; animation-duration: 7s; animation-delay: -2s; }
+  @keyframes floatBlob {
+    0% { transform: translate(0,0) scale(1); }
+    100% { transform: translate(30px, 40px) scale(1.12); }
+  }
+
+  /* ---- LAYOUT ---- */
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---- HEADER ---- */
+  .header { text-align: center; margin-bottom: 3rem; }
+
+  .pill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--text);
+    color: #f6ca13;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 1.4rem;
+    animation: fadeDown 0.5s ease both;
+  }
+
+  .main-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(2rem, 7vw, 3.8rem);
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.8rem;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+  .main-title .accent { color: #034a92; position: relative; display: inline-block; }
+  .main-title .accent::after {
+    content: '';
+    position: absolute;
+    bottom: 4px; left: 0; right: 0;
+    height: 6px;
+    background: #f6ca13;
+    border-radius: 3px;
+    z-index: -1;
+  }
+
+  .header-sub {
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 500;
+    animation: fadeDown 0.6s 0.2s ease both;
+  }
+
+  /* ---- RULES ---- */
+  .rules {
+    background: var(--text);
+    color: #fff;
+    border-radius: 20px;
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+  .rule-chip {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    white-space: nowrap;
+  }
+  .rule-chip.hot { background: rgba(246,202,19,0.15); border-color: rgba(246,202,19,0.4); color: #f6ca13; font-weight: 800; }
+
+  /* ---- LEADERBOARD ---- */
+  .board { display: flex; flex-direction: column; gap: 12px; margin-bottom: 2.5rem; }
+
+  .entry {
+    border-radius: 20px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+    animation: slideIn 0.5s ease both;
+  }
+  .entry:hover { transform: translateY(-3px); }
+  .entry:nth-child(1) { animation-delay: 0.4s; }
+  .entry:nth-child(2) { animation-delay: 0.5s; }
+  .entry:nth-child(3) { animation-delay: 0.6s; }
+  .entry:nth-child(4) { animation-delay: 0.7s; }
+  .entry:nth-child(5) { animation-delay: 0.8s; }
+
+  /* rank color themes */
+  .entry-1 { background: var(--yellow); box-shadow: 0 8px 32px rgba(255,229,70,0.4); }
+  .entry-1:hover { box-shadow: 0 16px 48px rgba(255,229,70,0.55); }
+
+  .entry-2 { background: #ffe0b2; box-shadow: 0 8px 32px rgba(255,180,80,0.3); }
+  .entry-2:hover { box-shadow: 0 16px 48px rgba(255,180,80,0.45); }
+
+  .entry-3 { background: #ffd0a0; box-shadow: 0 8px 32px rgba(255,160,60,0.3); }
+  .entry-3:hover { box-shadow: 0 16px 48px rgba(255,160,60,0.45); }
+
+  .entry-mystery {
+    background: var(--surface);
+    border: 2px dashed rgba(0,0,0,0.12);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+  .entry-mystery:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
+
+  .rank-num {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    min-width: 48px;
+    text-align: center;
+    line-height: 1;
+    color: rgba(0,0,0,0.55);
+  }
+  .entry-mystery .rank-num { color: #f6ca13; text-shadow: 0 2px 8px rgba(246,202,19,0.4); }
+
+  .entry-info { flex: 1; min-width: 0; }
+  .entry-name {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: rgba(0,0,0,0.85);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .entry-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(0,0,0,0.4);
+  }
+
+  .entry-amount {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: rgba(0,0,0,0.8);
+    white-space: nowrap;
+  }
+
+  /* mystery skeleton */
+  .skel-name {
+    height: 16px;
+    width: 140px;
+    background: rgba(0,0,0,0.08);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .skel-name::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+    animation: skelShine 1.6s infinite;
+  }
+  @keyframes skelShine { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+  .mystery-badge {
+    background: #034a92;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .entry-mystery .entry-amount { color: #f6ca13; font-size: 1.7rem; text-shadow: 0 2px 8px rgba(246,202,19,0.3); }
+
+  /* ---- FORM ---- */
+  .form-card {
+    background: var(--surface);
+    border-radius: 28px;
+    padding: 2rem;
+    box-shadow: 0 12px 60px rgba(0,0,0,0.08);
+    animation: fadeUp 0.6s 0.9s ease both;
+  }
+
+  .form-head {
+    margin-bottom: 1.6rem;
+    padding-bottom: 1.4rem;
+    border-bottom: 2px dashed rgba(0,0,0,0.08);
+  }
+  .form-head-emoji { font-size: 2.2rem; margin-bottom: 0.4rem; display: block; }
+  .form-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+  .form-sub { font-size: 13px; color: var(--muted); font-weight: 500; line-height: 1.6; }
+
+  .field { margin-bottom: 1.1rem; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.45);
+    margin-bottom: 7px;
+  }
+  .field input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 2px solid rgba(0,0,0,0.1);
+    background: var(--bg);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, background 0.2s, transform 0.1s;
+  }
+  .field input:focus {
+    border-color: var(--blue);
+    background: #fff;
+    transform: scale(1.01);
+  }
+  .field input::placeholder { color: rgba(0,0,0,0.25); }
+
+  .guess-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  .guess-block {
+    background: var(--bg);
+    border-radius: 16px;
+    padding: 1rem;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .guess-block:focus-within { border-color: var(--blue); background: #fff; }
+  .guess-block-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .guess-num {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: rgba(0,0,0,0.2);
+  }
+  .guess-amount-tag {
+    font-size: 11px;
+    font-weight: 800;
+    background: var(--text);
+    color: #f6ca13;
+    padding: 3px 9px;
+    border-radius: 100px;
+  }
+  .guess-block input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    background: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .guess-block input:focus { border-color: var(--blue); }
+  .guess-block input::placeholder { color: rgba(0,0,0,0.25); }
+
+  /* submit button */
+  .submit-btn {
+    width: 100%;
+    padding: 17px;
+    background: #034a92;
+    color: #fff;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    box-shadow: 0 6px 28px rgba(3,74,146,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  .submit-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.08);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(3,74,146,0.5); }
+  .submit-btn:hover::after { opacity: 1; }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; transform: none; }
+
+  /* result banner */
+  .result-banner {
+    display: none;
+    border-radius: 18px;
+    padding: 1.4rem 1.6rem;
+    margin-top: 1.2rem;
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  .result-banner.win { background: var(--lime); border: 2px solid rgba(0,0,0,0.1); }
+  .result-banner.partial { background: var(--yellow); border: 2px solid rgba(0,0,0,0.1); }
+  .result-banner.miss { background: #ffe5e5; border: 2px solid rgba(255,0,0,0.1); }
+  .result-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: rgba(0,0,0,0.85);
+    margin-bottom: 4px;
+  }
+  .result-body { font-size: 14px; color: rgba(0,0,0,0.6); font-weight: 500; line-height: 1.6; }
+
+  /* ---- ANIMATIONS ---- */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-24px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.88); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* ticker */
+  .ticker-wrap {
+    overflow: hidden;
+    background: var(--text);
+    color: #f6ca13;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 10px 0;
+    margin-bottom: 2.5rem;
+    border-radius: 14px;
+    animation: fadeUp 0.5s 0.25s ease both;
+  }
+  .ticker-inner {
+    display: flex;
+    gap: 3rem;
+    width: max-content;
+    animation: ticker 18s linear infinite;
+  }
+  .ticker-inner span { white-space: nowrap; }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .amiy-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 1.4rem;
+    animation: fadeDown 0.5s ease both;
+  }
+  .amiy-logo {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    filter: brightness(0) saturate(100%) invert(13%) sepia(40%) saturate(900%) hue-rotate(190deg) brightness(90%);
+  }
+  .pill-tag {
+    margin-bottom: 0 !important;
+    animation: none !important;
+  }
+.cta-block {
+    text-align: center;
+    margin-top: 1.2rem;
+    padding: 1.4rem 1.6rem;
+    background: var(--text);
+    border-radius: 20px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cta-question {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #f6ca13;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+  }
+  .cta-question em {
+    font-style: italic;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .cta-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 1rem;
+  }
+  .cta-lines span {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  .cta-lines span::before {
+    content: '→ ';
+    color: #f6ca13;
+    font-weight: 800;
+  }
+  .cta-closer {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+  }
+
+
+  .cta-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+  }
+  .cta-btn {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 12px 18px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .cta-btn:hover { transform: translateY(-2px); }
+  .cta-btn:active { transform: scale(0.97); }
+  .cta-yes { background: #f6ca13; color: #000; box-shadow: 0 4px 20px rgba(246,202,19,0.4); }
+  .cta-maybe { background: #fff; color: #034a92; border: 2px solid #034a92; }
+  .cta-no { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); border: 2px solid rgba(255,255,255,0.12); }
+  .cta-response {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #f6ca13;
+    min-height: 20px;
+    margin-bottom: 0.8rem;
+    line-height: 1.5;
+    transition: opacity 0.3s;
+  }
+
+
+  .field-err {
+    font-size: 11px;
+    font-weight: 700;
+    color: #ff4d4d;
+    margin-top: 5px;
+    padding-left: 2px;
+    letter-spacing: 0.02em;
+    min-height: 14px;
+  }
+  .game-input:focus, .guess-block input:focus {
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="bg-blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="blob blob-4"></div>
+</div>
+
+<div class="container">
+
+  <div class="header">
+    <div class="pill-tag">✦ May 2025 - Bonus Leaderboard</div>
+    <h1 class="main-title">Consistency<br><span class="accent">literally</span><br>pays off.</h1>
+    <p class="header-sub">Top 3 revealed. Bottom 2 are yours to figure out. 👀</p>
+  </div>
+
+  <div class="ticker-wrap">
+    <div class="ticker-inner">
+      <span>✦ MAY BONUSES ARE IN</span>
+      <span>✦ WHO MADE THE LIST?</span>
+      <span>✦ GUESS RIGHT = START 2H LATER</span>
+      <span>✦ NO CONSULTING EACH OTHER</span>
+      <span>✦ MAY BONUSES ARE IN</span>
+      <span>✦ WHO MADE THE LIST?</span>
+      <span>✦ GUESS RIGHT = START 2H LATER</span>
+      <span>✦ NO CONSULTING EACH OTHER</span>
+    </div>
+  </div>
+
+  <div class="rules">
+    <div class="rule-chip hot">🎯 Guess #4 &amp; #5</div>
+    <div class="rule-chip">💸 Both correct = +2h later shift</div>
+    <div class="rule-chip">🤫 No group chat cheating</div>
+    <div class="rule-chip">✍️ One submission only</div>
+  </div>
+
+  <div class="board">
+
+    <div class="entry entry-1">
+      <div class="rank-num">1</div>
+      <div class="entry-info">
+        <div class="entry-name">Metodi Atanasov</div>
+        <div class="entry-label">🏆 Top earner · May</div>
+      </div>
+      <div class="entry-amount">$1,710</div>
+    </div>
+
+    <div class="entry entry-2">
+      <div class="rank-num">2</div>
+      <div class="entry-info">
+        <div class="entry-name">Muhamet Ferizi</div>
+        <div class="entry-label">🥈 Runner up · May</div>
+      </div>
+      <div class="entry-amount">$1,245</div>
+    </div>
+
+    <div class="entry entry-3">
+      <div class="rank-num">3</div>
+      <div class="entry-info">
+        <div class="entry-name">Petar Ivanov</div>
+        <div class="entry-label">🥉 Third place · May</div>
+      </div>
+      <div class="entry-amount">$780</div>
+    </div>
+
+    <div class="entry entry-mystery">
+      <div class="rank-num">4</div>
+      <div class="entry-info">
+        <div class="skel-name"></div>
+        <div class="mystery-badge">🕵️ Who is this?</div>
+      </div>
+      <div class="entry-amount">$680</div>
+    </div>
+
+    <div class="entry entry-mystery">
+      <div class="rank-num">5</div>
+      <div class="entry-info">
+        <div class="skel-name"></div>
+        <div class="mystery-badge">🕵️ Who is this?</div>
+      </div>
+      <div class="entry-amount">$540</div>
+    </div>
+
+  </div>
+
+  <div class="form-card">
+    <div class="form-head">
+      <span class="form-head-emoji">🧠</span>
+      <div class="form-title">Drop your guesses</div>
+      <div class="form-sub">Think you know who's behind #4 and #5? Submit your picks. One shot - make it count. Whoever gets both right starts their shift 2 hours later. 🙏</div>
+    </div>
+
+    <div class="field">
+      <label>Your full name</label>
+      <input id="submitter" type="text" placeholder="e.g. Alex Johnson" autocomplete="off" />
+    </div>
+
+    <div class="guess-pair">
+      <div class="guess-block">
+        <div class="guess-block-header">
+          <div class="guess-num">#4</div>
+          <div class="guess-amount-tag">$680</div>
+        </div>
+        <input id="guess4" type="text" placeholder="Full name..." autocomplete="off" />
+      </div>
+      <div class="guess-block">
+        <div class="guess-block-header">
+          <div class="guess-num">#5</div>
+          <div class="guess-amount-tag">$540</div>
+        </div>
+        <input id="guess5" type="text" placeholder="Full name..." autocomplete="off" />
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitGuess()">Lock in my answers</button>
+
+    <div class="result-banner" id="resultBanner">
+      <div class="result-title" id="resultTitle"></div>
+      <div class="result-body" id="resultBody"></div>
+    </div>
+  </div>
+
+  <div class="cta-block">
+    <div class="cta-question">Will <em>you</em> be on this list next month? 👀</div>
+    <div class="cta-buttons" id="ctaButtons">
+      <button class="cta-btn cta-yes" onclick="ctaReact('yes')">Yes, of course 💪</button>
+      <button class="cta-btn cta-maybe" onclick="ctaReact('maybe')">Maybe... 🤔</button>
+      <button class="cta-btn cta-no" onclick="ctaReact('no')">idk if I can 😭</button>
+    </div>
+    <div class="cta-response" id="ctaResponse"></div>
+    <div class="cta-closer">Grab the money before others do. 💸</div>
+  </div>
+
+</div>
+
+<script>
+const CORRECT_4 = "ajan bikliqi";
+const CORRECT_5 = "drena shala";
+const SHEET_ID = "1bD9yU00YsfaKBKMCDGzXsjAzQsuC2h0GcCu4z-Reb44";
+const APPS_SCRIPT_URL = ""; // paste your Apps Script web app URL here
+
+function normalize(s) {
+  return s.toLowerCase().trim().replace(/[^a-z\s]/g,'').replace(/\s+/g,' ');
+}
+
+function isRealName(val) {
+  const cleaned = val.trim();
+  const parts = cleaned.split(/\s+/).filter(p => p.length > 0);
+  if (parts.length < 2) return false;
+  for (const p of parts) {
+    const letters = p.replace(/[^a-zA-Z]/g,'');
+    if (letters.length < 2) return false;
+    if (/^(.)\1+$/.test(letters)) return false;
+  }
+  const joined = parts.join('').toLowerCase();
+  const noVowels = !/[aeiou]/.test(joined);
+  if (noVowels && joined.length > 4) return false;
+  if (/^(asdf|qwer|zxcv|aaaa|bbbb|cccc|test|fake|asas)/.test(joined)) return false;
+  return true;
+}
+
+function setFieldError(id, msg) {
+  const el = document.getElementById(id);
+  el.style.borderColor = '#ff4d4d';
+  el.style.background = 'rgba(255,77,77,0.06)';
+  let err = el.parentElement.querySelector('.field-err');
+  if (!err) { err = document.createElement('div'); err.className = 'field-err'; el.parentElement.appendChild(err); }
+  err.textContent = msg;
+}
+
+function clearFieldError(id) {
+  const el = document.getElementById(id);
+  el.style.borderColor = '';
+  el.style.background = '';
+  const err = el.parentElement.querySelector('.field-err');
+  if (err) err.textContent = '';
+}
+
+function check(input, correct) {
+  const n = normalize(input), c = normalize(correct);
+  if (n === c) return 'exact';
+  const shared = normalize(input).split(' ').filter(p => p.length > 1 && normalize(correct).split(' ').includes(p));
+  return shared.length ? 'partial' : 'miss';
+}
+
+async function submitGuess() {
+  const sub = document.getElementById('submitter').value.trim();
+  const g4  = document.getElementById('guess4').value.trim();
+  const g5  = document.getElementById('guess5').value.trim();
+  const btn = document.getElementById('submitBtn');
+  const banner = document.getElementById('resultBanner');
+  const rTitle = document.getElementById('resultTitle');
+  const rBody  = document.getElementById('resultBody');
+
+  clearFieldError('submitter'); clearFieldError('guess4'); clearFieldError('guess5');
+  banner.style.display = 'none';
+  let hasError = false;
+
+  if (!sub) { setFieldError('submitter', 'Required — enter your full name'); hasError = true; }
+  else if (!isRealName(sub)) { setFieldError('submitter', 'Looks off — first and last name please'); hasError = true; }
+  if (!g4) { setFieldError('guess4', 'Required'); hasError = true; }
+  else if (!isRealName(g4)) { setFieldError('guess4', 'Enter a real name (first + last)'); hasError = true; }
+  if (!g5) { setFieldError('guess5', 'Required'); hasError = true; }
+  else if (!isRealName(g5)) { setFieldError('guess5', 'Enter a real name (first + last)'); hasError = true; }
+  if (hasError) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Locking in... 🔐';
+
+  const r4 = check(g4, CORRECT_4);
+  const r5 = check(g5, CORRECT_5);
+  const both = r4 === 'exact' && r5 === 'exact';
+  const one  = (r4 === 'exact') !== (r5 === 'exact');
+  const ts   = new Date().toLocaleString('en-GB', {timeZone:'Europe/Belgrade'});
+  const score = both ? 'BOTH CORRECT' : one ? 'ONE CORRECT' : 'MISS';
+
+  if (APPS_SCRIPT_URL) {
+    try {
+      const url = `${APPS_SCRIPT_URL}?timestamp=${encodeURIComponent(ts)}&submitter=${encodeURIComponent(sub)}&guess4=${encodeURIComponent(g4)}&guess5=${encodeURIComponent(g5)}&result4=${r4}&result5=${r5}&score=${score}`;
+      await fetch(url, { mode: 'no-cors' });
+    } catch(e) { console.warn('Sheet log failed:', e); }
+  }
+
+  banner.style.display = 'block';
+  if (both) {
+    banner.className = 'result-banner win';
+    rTitle.textContent = '🎉 IYKYK - you got it!';
+    rBody.textContent = `Both correct, ${sub}! Your answer's been logged. Watch out for the announcement - +2h tomorrow might just be yours 😮‍💨`;
+  } else if (one) {
+    const which = r4 === 'exact' ? '#4' : '#5';
+    banner.className = 'result-banner partial';
+    rTitle.textContent = `😬 So close, ${sub}...`;
+    rBody.textContent = `You got ${which} right but missed the other one. Logged! Better luck if we run this again 🤝`;
+  } else {
+    banner.className = 'result-banner miss';
+    rTitle.textContent = `💀 Nah ${sub}...`;
+    rBody.textContent = `Neither one. The mystery lives on. Answer logged - we'll reveal at the end 👀`;
+  }
+
+  btn.textContent = '✓ Answer locked in';
+}
+
+function ctaReact(choice) {
+  const r = document.getElementById('ctaResponse');
+  const btns = document.querySelectorAll('.cta-btn');
+  btns.forEach(b => { b.style.opacity = '0.4'; b.style.pointerEvents = 'none'; });
+  const msgs = {
+    yes: "that's the energy. see you on the board. 🏆",
+    maybe: "maybe is just yes with less confidence. you got this. 👊",
+    no: "wrong answer. the leaderboard has no sympathy. 😤"
+  };
+  r.textContent = msgs[choice];
+  r.style.opacity = '0';
+  setTimeout(() => { r.style.opacity = '1'; }, 50);
+}
+
+</script>
+</body>
+</html>
