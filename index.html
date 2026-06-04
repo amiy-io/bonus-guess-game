@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Consistency Literally Pays Off</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjIwIiBmaWxsPSIjMDM0YTkyIi8+CiAgPHRleHQgeT0iNzgiIHg9IjUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjcyIj7wn4+GPC90ZXh0Pgo8L3N2Zz4=" />
 <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Syne:wght@400;500;700;800&family=Cabinet+Grotesk:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
@@ -778,10 +779,10 @@ async function submitGuess() {
   const score = both ? 'BOTH CORRECT' : one ? 'ONE CORRECT' : 'MISS';
 
   try {
-    fetch("https://hook.eu1.make.com/ysex2chlgc65d8aeft9j9jhxtt8prhqw", {
+    fetch("https://formspree.io/f/xaqzyryo", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ submitter: sub, guess4: g4, guess5: g5, score })
+      headers: {"Content-Type": "application/json", "Accept": "application/json"},
+      body: JSON.stringify({ submitter: sub, guess4: g4, guess5: g5, score, _subject: "Bonus Game: New guess from " + sub })
     }).catch(() => {});
   } catch(e) {}
 
