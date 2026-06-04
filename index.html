@@ -701,7 +701,6 @@
 const CORRECT_4 = "ajan bikliqi";
 const CORRECT_5 = "drena shala";
 const SHEET_ID = "1bD9yU00YsfaKBKMCDGzXsjAzQsuC2h0GcCu4z-Reb44";
-const GOOGLE_FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSc3CUkYdstSP8aNGhklyb_jr8S6nE9VYEy9VdUdPf8pA7ZXHQ/formResponse";
 
 function normalize(s) {
   return s.toLowerCase().trim().replace(/[^a-z\s]/g,'').replace(/\s+/g,' ');
@@ -775,58 +774,13 @@ async function submitGuess() {
   const r5 = check(g5, CORRECT_5);
   const both = r4 === 'exact' && r5 === 'exact';
   const one  = (r4 === 'exact') !== (r5 === 'exact');
-  const ts   = new Date().toLocaleString('en-GB', {timeZone:'Europe/Belgrade'});
   const score = both ? 'BOTH CORRECT' : one ? 'ONE CORRECT' : 'MISS';
 
-  try {
-    fetch("https://formspree.io/f/xaqzyryo", {
-      method: "POST",
-      headers: {"Content-Type": "application/json", "Accept": "application/json"},
-      body: JSON.stringify({ submitter: sub, guess4: g4, guess5: g5, score, _subject: "Bonus Game: New guess from " + sub })
-    }).catch(() => {});
-  } catch(e) {}
-
-    btn.disabled = true;
-  btn.textContent = 'Locking in... 🔐';
-
-  const r4 = check(g4, CORRECT_4);
-  const r5 = check(g5, CORRECT_5);
-  const both = r4 === 'exact' && r5 === 'exact';
-  const one  = (r4 === 'exact') !== (r5 === 'exact');
-  const ts   = new Date().toLocaleString('en-GB', {timeZone:'Europe/Belgrade'});
-  const score = both ? 'BOTH CORRECT' : one ? 'ONE CORRECT' : 'MISS';
-
-  try {
-    // Silent Google Form submission via hidden iframe
-    let iframe = document.getElementById('_gf_iframe');
-    if (!iframe) {
-      iframe = document.createElement('iframe');
-      iframe.id = '_gf_iframe';
-      iframe.name = '_gf_iframe';
-      iframe.style.display = 'none';
-      document.body.appendChild(iframe);
-    }
-    const gform = document.createElement('form');
-    gform.method = 'POST';
-    gform.action = GOOGLE_FORM_ACTION;
-    gform.target = '_gf_iframe';
-    const gfields = {
-      'entry.1474231067': sub,
-      'entry.157175131': g4,
-      'entry.1432337517': g5,
-      'entry.1570434355': score
-    };
-    for (const [key, val] of Object.entries(gfields)) {
-      const inp = document.createElement('input');
-      inp.type = 'hidden';
-      inp.name = key;
-      inp.value = val;
-      gform.appendChild(inp);
-    }
-    document.body.appendChild(gform);
-    gform.submit();
-    setTimeout(() => { gform.remove(); }, 3000);
-  } catch(e) { console.warn('Form submit failed:', e); }
+  fetch("https://formspree.io/f/xaqzyryo", {
+    method: "POST",
+    headers: {"Content-Type": "application/json", "Accept": "application/json"},
+    body: JSON.stringify({ submitter: sub, guess4: g4, guess5: g5, score, _subject: "Bonus Game: New guess from " + sub })
+  }).catch(() => {});
 
   banner.style.display = 'block';
   if (both) {
