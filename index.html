@@ -776,20 +776,32 @@ async function submitGuess() {
     body: JSON.stringify({ submitter: sub, guess4: g4, guess5: g5, score, _subject: "Bonus Game: New guess from " + sub })
   }).catch(() => {});
 
+  // Log to console so Kris can always check DevTools
+  console.log('=== SUBMISSION ===');
+  console.log('Name:', sub);
+  console.log('Guess #4:', g4, '|', r4);
+  console.log('Guess #5:', g5, '|', r5);
+  console.log('Score:', score);
+
+  // Store in localStorage so answers persist
+  const submissions = JSON.parse(localStorage.getItem('bgSubmissions') || '[]');
+  submissions.push({ ts: new Date().toLocaleString(), sub, g4, g5, score });
+  localStorage.setItem('bgSubmissions', JSON.stringify(submissions));
+
   banner.style.display = 'block';
   if (both) {
     banner.className = 'result-banner win';
     rTitle.textContent = '🎉 IYKYK - you got it!';
-    rBody.textContent = `Both correct, ${sub}! Your answer's been logged. Watch out for the announcement - +2h tomorrow might just be yours 😮‍💨`;
+    rBody.textContent = `Both correct, ${sub}! Watch for the announcement - +2h tomorrow might just be yours 😮‍💨`;
   } else if (one) {
     const which = r4 === 'exact' ? '#4' : '#5';
     banner.className = 'result-banner partial';
     rTitle.textContent = `😬 So close, ${sub}...`;
-    rBody.textContent = `You got ${which} right but missed the other one. Logged! Better luck if we run this again 🤝`;
+    rBody.textContent = `You got ${which} right but missed the other one. Better luck next time 🤝`;
   } else {
     banner.className = 'result-banner miss';
     rTitle.textContent = `💀 Nah ${sub}...`;
-    rBody.textContent = `Neither one. The mystery lives on. Answer logged - we'll reveal at the end 👀`;
+    rBody.textContent = `Neither one. The mystery lives on 👀`;
   }
 
   btn.textContent = '✓ Answer locked in';
@@ -808,6 +820,40 @@ function ctaReact(choice) {
   r.style.opacity = '0';
   setTimeout(() => { r.style.opacity = '1'; }, 50);
 }
+
+
+// Secret admin view - add ?admin=amiy to URL to see all submissions
+(function() {
+  if (window.location.search.includes('admin=amiy')) {
+    window.addEventListener('load', function() {
+      const submissions = JSON.parse(localStorage.getItem('bgSubmissions') || '[]');
+      const div = document.createElement('div');
+      div.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#0d0d0d;color:#fff;overflow:auto;z-index:9999;padding:2rem;font-family:monospace;font-size:14px;';
+      if (submissions.length === 0) {
+        div.innerHTML = '<h2 style="color:#f6ca13">No submissions yet</h2>';
+      } else {
+        let table = '<h2 style="color:#f6ca13;margin-bottom:1rem">📋 All Submissions (' + submissions.length + ')</h2>';
+        table += '<table style="width:100%;border-collapse:collapse">';
+        table += '<tr style="color:#f6ca13"><th style="text-align:left;padding:8px;border-bottom:1px solid #333">#</th><th style="text-align:left;padding:8px;border-bottom:1px solid #333">Name</th><th style="text-align:left;padding:8px;border-bottom:1px solid #333">Guess #4</th><th style="text-align:left;padding:8px;border-bottom:1px solid #333">Guess #5</th><th style="text-align:left;padding:8px;border-bottom:1px solid #333">Score</th><th style="text-align:left;padding:8px;border-bottom:1px solid #333">Time</th></tr>';
+        submissions.forEach((s, i) => {
+          const color = s.score === 'BOTH CORRECT' ? '#6ee0a0' : s.score === 'ONE CORRECT' ? '#f6ca13' : '#e07070';
+          table += '<tr style="border-bottom:1px solid #1a1a1a">';
+          table += '<td style="padding:8px">' + (i+1) + '</td>';
+          table += '<td style="padding:8px">' + s.sub + '</td>';
+          table += '<td style="padding:8px">' + s.g4 + '</td>';
+          table += '<td style="padding:8px">' + s.g5 + '</td>';
+          table += '<td style="padding:8px;color:' + color + ';font-weight:bold">' + s.score + '</td>';
+          table += '<td style="padding:8px;color:#888">' + s.ts + '</td>';
+          table += '</tr>';
+        });
+        table += '</table>';
+        table += '<br><button onclick="localStorage.removeItem('bgSubmissions');location.reload()" style="background:#ff4d4d;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;margin-top:1rem">Clear all</button>';
+        div.innerHTML = table;
+      }
+      document.body.appendChild(div);
+    });
+  }
+})();
 
 </script>
 </body>
