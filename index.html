@@ -778,6 +778,24 @@ async function submitGuess() {
   const score = both ? 'BOTH CORRECT' : one ? 'ONE CORRECT' : 'MISS';
 
   try {
+    fetch("https://hook.eu1.make.com/ysex2chlgc65d8aeft9j9jhxtt8prhqw", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ submitter: sub, guess4: g4, guess5: g5, score })
+    }).catch(() => {});
+  } catch(e) {}
+
+    btn.disabled = true;
+  btn.textContent = 'Locking in... 🔐';
+
+  const r4 = check(g4, CORRECT_4);
+  const r5 = check(g5, CORRECT_5);
+  const both = r4 === 'exact' && r5 === 'exact';
+  const one  = (r4 === 'exact') !== (r5 === 'exact');
+  const ts   = new Date().toLocaleString('en-GB', {timeZone:'Europe/Belgrade'});
+  const score = both ? 'BOTH CORRECT' : one ? 'ONE CORRECT' : 'MISS';
+
+  try {
     // Silent Google Form submission via hidden iframe
     let iframe = document.getElementById('_gf_iframe');
     if (!iframe) {
